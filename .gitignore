@@ -1,0 +1,25 @@
+# --- .NET ---
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- Rust ---
+target/
+**/*.rs.bk
+Cargo.lock
+
+# --- Betriebssystem & IDEs ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.settings/
+
+# --- Sonstiges ---
+*.log
+*.tmp

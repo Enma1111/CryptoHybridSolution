@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CryptoSolution.Tests/CryptoSolution.Tests.csproj" Id="9253e10b-66f6-4cec-ad49-a1aa53fddbd5" />
+  <Project Path="CryptoSolution/CryptoSolution.csproj" />
+</Solution>

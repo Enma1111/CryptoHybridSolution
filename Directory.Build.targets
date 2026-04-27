@@ -1,0 +1,12 @@
+<Project>
+  <Target Name="BuildRustGlobally" BeforeTargets="Build">
+    <Message Importance="high" Text="Baue Rust-Core für dieses Projekt..." />
+    
+    <Exec Command="cargo build --release" 
+          WorkingDirectory="$(MSBuildThisFileDirectory)rust-core" />
+    
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)rust-core\target\release\rust_core.dll" 
+          DestinationFolder="$(OutDir)" 
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>
