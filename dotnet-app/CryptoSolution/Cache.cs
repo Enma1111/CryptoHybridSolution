@@ -12,7 +12,11 @@ public interface ICache
 }
 
 /// <summary>
-/// Für Demonstartionszwecke implementieren wir hier eine einfache MemoryCache-Adapterklasse, die das ICache-Interface verwendet. In einer echten Anwendung kann man sie durch einen Redis- oder KeyDb-Adapter ersetzen, ohne dass der Rest des Codes angepasst werden muss. Methoden nutzen ValueTask für bessere Performance bei synchronen Rückgaben.
+/// Für Demonstartionszwecke implementieren wir hier eine einfache MemoryCache-Adapterklasse, 
+/// die das ICache-Interface verwendet. 
+/// In einer echten Anwendung kann man sie durch einen Redis- oder KeyDb-Adapter ersetzen, 
+/// ohne dass der Rest des Codes angepasst werden muss. 
+/// Methoden nutzen ValueTask für bessere Performance bei synchronen Rückgaben.
 /// </summary>
 public class MemoryCacheAdapter(IMemoryCache cache) : ICache
 {
@@ -36,7 +40,9 @@ public class MemoryCacheAdapter(IMemoryCache cache) : ICache
 
     /// <summary>
     /// Ruft einen Wert aus dem Cache ab oder generiert ihn asynchron, falls er noch nicht existiert.
-    /// Verhindert "Cache Stampedes" durch atomares Locking. Nutzt ValueTask für bessere Performance bei synchronen Rückgaben. Die Gültigkeitsdauer des Eintrags kann optional angegeben werden, standardmäßig 5 Minuten.
+    /// Verhindert "Cache Stampedes" durch atomares Locking. 
+    /// Nutzt ValueTask für bessere Performance bei synchronen Rückgaben. 
+    /// Die Gültigkeitsdauer des Eintrags kann optional angegeben werden, standardmäßig 5 Minuten.
     /// </summary>
     /// <typeparam name="T">Der Typ des im Cache gespeicherten Wertes.</typeparam>
     /// <param name="key">Der eindeutige Schlüssel des Cache-Eintrags.</param>

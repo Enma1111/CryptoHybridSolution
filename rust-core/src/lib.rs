@@ -16,17 +16,17 @@ use core::panic::PanicInfo;
 /// dass `ptr` ein valider Pointer auf `len` Bytes ist.
 #[unsafe(no_mangle)]
 pub extern "C" fn validate_x509_structure(ptr: *const u8, len: usize) -> bool {
+    // Einfache Prüfung ob gültige Pointer/Längen an die Funktion übergeben wurde.
     if ptr.is_null() || len == 0 {
         return false;
     }
 
-    // 2. Erzeuge ein Slice aus dem Pointer. 
-    // SAFETY: Wir vertrauen darauf, dass der Aufrufer uns gültige Pointer/Längen gibt.
+    // Erzeuge ein Slice aus dem Pointer. 
     let data = unsafe { core::slice::from_raw_parts(ptr, len) };
 
     match Asn1Header::parse(data) {
         Ok(header) => {
-            if header.tag == Asn1Tag::Sequenz {
+            if header.tag == Asn1Tag::Sequence {
                 return (header.header_bytes + header.length) <= data.len();
             }
             false
@@ -52,6 +52,7 @@ impl Asn1Header {
         let first_len_byte = data[1];
 
         // Bit 8 ist 0 -> Short Form (Länge passt in ein Byte: 0-127)
+        // 0x80 -> 1000_0000b
         if first_len_byte & 0x80 == 0  {
             Ok(Asn1Header {
                 tag,
@@ -61,9 +62,10 @@ impl Asn1Header {
         }
         // Bit 8 ist 1 -> Long Form (Länge erstreckt sich über mehrere Bytes)
         else {
+            // 0x7F -> 0111_1111b
             let num_len_bytes =(first_len_byte & 0x7F) as usize;
 
-            // X.509 Zertifikate sollten keine absurden Längenfelder haben (4 Bytes = 4GB reicht locker)
+            // X.509 Zertifikate sollten keine absurden Längenfelder haben (4 Bytes = 4GB sollten reichen)
             if num_len_bytes == 0 || num_len_bytes > 4 {
                 return Err("Ungültige Längen-Kodierung"); 
             }
@@ -91,7 +93,7 @@ impl Asn1Header {
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum Asn1Tag {
-    Sequenz = 0x30,
+    Sequence = 0x30,
     Set = 0x31,
     PrintableString = 0x13,
     Utf8String = 0x0C,
@@ -109,7 +111,7 @@ impl TryFrom<u8> for Asn1Tag {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0x30 => Ok(Asn1Tag::Sequenz),
+            0x30 => Ok(Asn1Tag::Sequence),
             0x31 => Ok(Asn1Tag::Set),
             0x02 => Ok(Asn1Tag::Integer),
             0x03 => Ok(Asn1Tag::BitString),
