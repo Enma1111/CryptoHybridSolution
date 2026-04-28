@@ -23,14 +23,14 @@ public partial class CryptoBridge(ICache cache)
     /// <param name="zertifikat">Das zu validierende Zertifikat als Byte-Array.</param>
     /// <param name="logger">Optionaler Logger für den Test-Output.</param>
     /// <exception cref="InvalidOperationException">Wird geworfen, wenn die ASN.1-Struktur ungültig ist.</exception>
-    public async ValueTask RunIntegrationDemoAsync(byte[] zertifikat, ITestOutputHelper? logger = null)
+    public async ValueTask RunIntegrationDemoAsync(byte[] certificate, ITestOutputHelper? logger = null)
     {
-        string certHash = Convert.ToBase64String(SHA256.HashData(zertifikat));
+        string certHash = Convert.ToBase64String(SHA256.HashData(certificate));
 
-        // GetOrAddAsync kapselt die gesamte Stampede-Protection und Cache-Logi
+        // GetOrAddAsync kapselt die gesamte Stampede-Protection und Cache-Logik
         bool isValid = await cache.GetOrAddAsync(certHash, async () =>
         {
-            return ValidateRustStructure(zertifikat);
+            return ValidateRustStructure(certificate);
         });
 
         if (!isValid)
@@ -39,18 +39,18 @@ public partial class CryptoBridge(ICache cache)
         }
 
         var parser = new X509CertificateParser();
-        var cert = parser.ReadCertificate(zertifikat);
+        var cert = parser.ReadCertificate(certificate);
         logger?.WriteLine($"Bouncy Castle bestätigt Zertifikat für: {cert.SubjectDN}");
 
     }
 
-    private bool ValidateRustStructure(byte[] zertifikat)
+    private bool ValidateRustStructure(byte[] certificate)
     {
         unsafe
         {
-            fixed (byte* ptr = zertifikat)
+            fixed (byte* ptr =certificate)
             {
-                return validate_x509_structure((IntPtr)ptr, zertifikat.Length);
+                return validate_x509_structure((IntPtr)ptr, certificate.Length);
             }
         }
     }

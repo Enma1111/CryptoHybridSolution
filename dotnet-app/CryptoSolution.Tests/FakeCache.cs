@@ -32,7 +32,7 @@ public class FakeCache : ICache
         return newValue;
     }
 
-    public ValueTask Remove(string key)
+    public ValueTask RemoveAsync(string key)
     {
         _storage.Remove(key);
         return ValueTask.CompletedTask;
