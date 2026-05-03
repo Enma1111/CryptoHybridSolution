@@ -31,13 +31,13 @@ public class CryptoIntegrationTests(ITestOutputHelper logger)
     public async Task Test_Integration_With_Real_Certificate()
     {
         // Arrange
-        byte[] certBytes = File.ReadAllBytes("testcert.cer");
+        byte[] certBytes = await File.ReadAllBytesAsync("testcert.cer");
         var fakeCache = new FakeCache();
-        var bridge = new CryptoBridge(fakeCache);
+        var bridge = new CryptoBridge(fakeCache, _output);
         string expectedHash = Convert.ToBase64String(SHA256.HashData(certBytes));
 
         // Act
-        await bridge.RunIntegrationDemoAsync(certBytes, _output);
+        await bridge.RunIntegrationDemoAsync(certBytes);
         var cached = await fakeCache.GetAsync<bool>(expectedHash);
 
         // Assert

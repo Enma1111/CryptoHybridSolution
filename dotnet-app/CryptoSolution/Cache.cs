@@ -20,7 +20,7 @@ public interface ICache
 /// </summary>
 public class MemoryCacheAdapter(IMemoryCache cache) : ICache
 {
-    private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = 
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks =
         new(Environment.ProcessorCount * 2, 1000);
 
     public ValueTask AddAsync<T>(string key, T value, TimeSpan? ttl = null)

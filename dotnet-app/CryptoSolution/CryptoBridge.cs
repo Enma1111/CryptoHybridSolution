@@ -10,7 +10,8 @@ namespace CryptoSolution;
 /// Nutzt Caching zur Optimierung der Performance bei wiederholten Validierungen.
 /// </summary>
 /// <param name="cache">Die zu verwendende Cache-Implementierung (Dependency Injection).</param>
-public partial class CryptoBridge(ICache cache)
+/// <param name="logger">Optionaler Logger für den Test-Output.</param>
+public partial class CryptoBridge(ICache cache, ITestOutputHelper? logger = null)
 {
     [LibraryImport("rust_core.dll", StringMarshalling = StringMarshalling.Utf8)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -21,16 +22,15 @@ public partial class CryptoBridge(ICache cache)
     /// Nutzt das Caching, um redundante Rust-Validierungen zu vermeiden.
     /// </summary>
     /// <param name="zertifikat">Das zu validierende Zertifikat als Byte-Array.</param>
-    /// <param name="logger">Optionaler Logger für den Test-Output.</param>
     /// <exception cref="InvalidOperationException">Wird geworfen, wenn die ASN.1-Struktur ungültig ist.</exception>
-    public async ValueTask RunIntegrationDemoAsync(byte[] certificate, ITestOutputHelper? logger = null)
+    public async ValueTask RunIntegrationDemoAsync(ReadOnlyMemory<byte> certificate)
     {
-        string certHash = Convert.ToBase64String(SHA256.HashData(certificate));
+        string certHash = Convert.ToBase64String(SHA256.HashData(certificate.Span));
 
         // GetOrAddAsync kapselt die gesamte Stampede-Protection und Cache-Logik
         bool isValid = await cache.GetOrAddAsync(certHash, async () =>
         {
-            return ValidateRustStructure(certificate);
+            return ValidateRustStructure(certificate.Span);
         });
 
         if (!isValid)
@@ -39,16 +39,16 @@ public partial class CryptoBridge(ICache cache)
         }
 
         var parser = new X509CertificateParser();
-        var cert = parser.ReadCertificate(certificate);
+        var cert = parser.ReadCertificate(certificate.ToArray());
         logger?.WriteLine($"Bouncy Castle bestätigt Zertifikat für: {cert.SubjectDN}");
 
     }
 
-    private bool ValidateRustStructure(byte[] certificate)
+    private bool ValidateRustStructure(ReadOnlySpan<byte> certificate)
     {
         unsafe
         {
-            fixed (byte* ptr =certificate)
+            fixed (byte* ptr = certificate)
             {
                 return validate_x509_structure((IntPtr)ptr, certificate.Length);
             }
