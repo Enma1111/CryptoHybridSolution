@@ -15,7 +15,7 @@ public partial class CryptoBridge(ICache cache, ITestOutputHelper? logger = null
 {
     [LibraryImport("rust_core.dll", StringMarshalling = StringMarshalling.Utf8)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool validate_x509_structure(IntPtr data, int len);
+    private static partial bool validate_x509_structure(IntPtr data, int len);
 
     /// <summary>
     /// Führt die Validierung und das Parsen des Zertifikats durch.
@@ -30,7 +30,7 @@ public partial class CryptoBridge(ICache cache, ITestOutputHelper? logger = null
         // GetOrAddAsync kapselt die gesamte Stampede-Protection und Cache-Logik
         bool isValid = await cache.GetOrAddAsync(certHash, async () =>
         {
-            return ValidateRustStructure(certificate.Span);
+            return ValidateX509Structure(certificate.Span);
         });
 
         if (!isValid)
@@ -44,7 +44,7 @@ public partial class CryptoBridge(ICache cache, ITestOutputHelper? logger = null
 
     }
 
-    private bool ValidateRustStructure(ReadOnlySpan<byte> certificate)
+    public static bool ValidateX509Structure(ReadOnlySpan<byte> certificate)
     {
         unsafe
         {

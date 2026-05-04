@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using System.Buffers;
+using Xunit.Abstractions;
 
 namespace CryptoSolution;
 
@@ -30,6 +31,12 @@ public class LinqValidationDemo(CryptoBridge bridge, ITestOutputHelper logger)
 
         logger?.WriteLine($"Verarbeite Zertifikat mit LINQ-Abfrage. Länge: {dataToValidate.Length} Bytes.");
 
-        await bridge.RunIntegrationDemoAsync(dataToValidate);
+        using (IMemoryOwner<byte> memoryOwner = MemoryPool<byte>.Shared.Rent(dataToValidate.Length))
+        {
+            Memory<byte> memory = memoryOwner.Memory.Slice(0, dataToValidate.Length);
+            dataToValidate.CopyTo(memory);
+            logger?.WriteLine("Daten in Memory gepuffert und bereit für die Übergabe an die CryptoBridge.");
+            await bridge.RunIntegrationDemoAsync(memory);
+        }
     }
 }

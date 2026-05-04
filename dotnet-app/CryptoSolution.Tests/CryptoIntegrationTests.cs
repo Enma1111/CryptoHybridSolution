@@ -15,13 +15,7 @@ public class CryptoIntegrationTests(ITestOutputHelper logger)
     {
         // Act
         bool result = false;
-        unsafe
-        {
-            fixed (byte* ptr = data)
-            {
-                result = CryptoBridge.validate_x509_structure((IntPtr)ptr, data.Length);
-            }
-        }
+        result = CryptoBridge.ValidateX509Structure(data);
 
         // Assert
         Assert.Equal(expectedResult, result);
