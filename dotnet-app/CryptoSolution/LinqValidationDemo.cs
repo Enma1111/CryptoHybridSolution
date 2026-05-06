@@ -18,7 +18,7 @@ public class LinqValidationDemo(CryptoBridge bridge, ITestOutputHelper logger)
     public async Task RunLinqValidationDemoAsync(IEnumerable<CertificateRecord> databaseDummy)
     {
         byte[]? dataToValidate = databaseDummy
-            .AsQueryable()
+            .AsQueryable() // Simuliert die Abfrage einer Datenbanktabelle mit LINQ
             .Where(c => c.IsActive && c.ValidUntil > DateTime.UtcNow)
             .OrderBy(c => c.ValidFrom)
             .Select(c => c.RawData)
